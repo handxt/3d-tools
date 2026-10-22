@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>HX3D Studio</title>
+<style>
+:root{--bg:#171a22;--pn:#1f232e;--ln:#2e3342;--tx:#dfe3ee;--mu:#8b93a7;--ac:#e3b23c;--ac-a:rgba(227,178,60,.45);--ac-s:rgba(227,178,60,.12);--glass:rgba(31,35,46,.72);--bad:#f08a8a}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-tap-highlight-color:transparent}
+main{display:grid;grid-template-columns:1fr 400px;height:100dvh}
+#vp{position:relative;min-width:0;min-height:0;overflow:hidden}#c{width:100%;height:100%;display:block;touch-action:none;outline:0}
+button,input,textarea,select{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--ln);border-radius:6px;padding:6px 10px}
+button{cursor:pointer;white-space:nowrap;transition:border-color .12s,background .12s}
+button:hover:not(:disabled){border-color:var(--ac-a)}button:disabled{opacity:.4;cursor:default}
+button.on{background:var(--ac-s);border-color:var(--ac-a)}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--ac-a);outline-offset:1px}
+.bar{position:absolute;display:flex;gap:4px;padding:5px;background:var(--glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--ln);border-radius:10px}
+.bar button,.bar select{padding:4px 9px;font-size:13px;background:transparent}.bar .sp{width:1px;background:var(--ln);margin:2px 3px}
+#tb{left:10px;top:10px;max-width:calc(100% - 20px);overflow-x:auto;scrollbar-width:none}#tb::-webkit-scrollbar{display:none}
+#hud{left:10px;bottom:10px;max-width:calc(100% - 20px);flex-wrap:wrap}
+#ol{position:absolute;right:10px;top:54px;width:210px;max-height:46%;display:flex;flex-direction:column;background:var(--glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--ln);border-radius:10px;font-size:13px}
+#ol summary{padding:7px 10px;cursor:pointer;color:var(--mu);list-style:none;user-select:none}#ol summary::-webkit-details-marker{display:none}#ol[open] summary{border-bottom:1px solid var(--ln)}
+#list{overflow:auto;padding:4px}.it{display:flex;align-items:center;gap:6px;padding:3px 4px 3px 8px;border-radius:6px;border:1px solid transparent}
+.it.sel{background:var(--ac-s);border-color:var(--ac-a)}.it .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;cursor:pointer}.it em{font-style:normal;color:var(--mu);font-size:11px}
+.it button{padding:0 6px;border:0;background:transparent;color:var(--mu)}.it button:hover:not(:disabled){color:var(--tx)}.it.off .nm{opacity:.45}.empty{padding:8px;color:var(--mu)}
+aside{display:flex;flex-direction:column;background:var(--pn);border-left:1px solid var(--ln);min-height:0}
+details.cfg{padding:10px 12px;border-bottom:1px solid var(--ln)}details.cfg summary{cursor:pointer;color:var(--mu)}
+details.cfg label{display:block;margin-top:8px;color:var(--mu);font-size:12px}details.cfg input,details.cfg select{width:100%}details.cfg .chk{display:flex;gap:8px;align-items:center}details.cfg .chk input{width:auto}
+#log{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px;overscroll-behavior:contain}
+#log>div{white-space:pre-wrap;word-break:break-word}.me{align-self:flex-end;background:var(--bg);padding:6px 10px;border-radius:8px;max-width:90%;border:1px solid var(--ln)}
+.tool{font:12px ui-monospace,monospace;color:var(--mu);border-left:2px solid var(--ln);padding-left:8px}.tool.bad{color:var(--bad);border-color:var(--bad)}
+.sys{color:var(--mu);font-size:12px}#log img{display:block;width:100%;margin-top:6px;border-radius:6px;border:1px solid var(--ln)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.chips button{font-size:12px;padding:3px 9px;border-radius:99px;color:var(--mu)}
+#st{padding:0 12px;min-height:18px;font-size:12px;color:var(--mu)}
+#f{display:flex;gap:8px;padding:8px 12px 12px;border-top:1px solid var(--ln)}#p{flex:1;resize:none;height:64px}
+#go{background:var(--ac);color:#1a1405;border:0;font-weight:600;min-width:64px}#go.stop{background:transparent;color:var(--bad);border:1px solid var(--bad)}
+@media(max-width:800px){main{grid-template-columns:1fr;grid-template-rows:46dvh 1fr}aside{border-left:0;border-top:1px solid var(--ln)}#ol{width:170px;max-height:50%}#hud{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}#hud::-webkit-scrollbar{display:none}}
+</style>
+<script type="importmap">{"imports":{
+"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+"three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+"three-mesh-bvh":"https://cdn.jsdelivr.net/npm/three-mesh-bvh@0.7.6/build/index.module.js",
+"three-bvh-csg":"https://cdn.jsdelivr.net/npm/three-bvh-csg@0.0.16/build/index.module.js"}}</script>
+</head><body>
+<main>
+<section id="vp"><canvas id="c" tabindex="0"></canvas>
+<div class="bar" id="tb">
+ <button id="undo" title="Undo (Ctrl+Z)" disabled>↶</button><button id="redo" title="Redo (Ctrl+Y)" disabled>↷</button><span class="sp"></span>
+ <button data-mode="translate" class="on" title="Pindah (W)">Pindah</button><button data-mode="rotate" title="Putar (E)">Putar</button><button data-mode="scale" title="Skala (R)">Skala</button><span class="sp"></span>
+ <button data-view="front">Depan</button><button data-view="right">Samping</button><button data-view="top">Atas</button><button data-view="iso">Iso</button><span class="sp"></span>
+ <button id="wire">Wire</button><button id="grid" class="on">Grid</button><button id="play" class="on" title="Putar/jeda animasi">▶ Anim</button>
+</div>
+<details id="ol" open><summary>Objek <span id="cnt"></span></summary><div id="list"></div></details>
+<div class="bar" id="hud">
+ <select id="fmt"><option value="glb">GLB</option><option value="gltf">glTF</option><option value="obj">OBJ</option><option value="stl">STL</option></select><button id="exp">Unduh</button><span class="sp"></span>
+ <button id="open">Buka file</button><button id="save">Simpan proyek</button><button id="clear">Kosongkan</button><button id="newchat" title="Reset konteks AI (scene tetap)">Chat baru</button>
+ <input id="file" type="file" accept=".glb,.gltf,.obj,.stl,.json" hidden>
+</div></section>
+<aside>
+<details class="cfg" id="cfg"><summary>Provider AI</summary>
+<label>Preset<select id="preset"><option value="">(custom)</option><option value="openai">OpenAI</option><option value="openrouter">OpenRouter</option><option value="groq">Groq</option><option value="ollama">Ollama (lokal)</option><option value="proxy">proxy.php (server sendiri)</option></select></label>
+<label>Base URL (OpenAI-compatible, atau proxy.php)<input id="base" placeholder="https://api.openai.com/v1"></label>
+<label>API key (kosongkan kalau pakai proxy.php)<input id="key" type="password" autocomplete="off"></label>
+<label>Access token proxy (HX_TOKEN, opsional)<input id="token" type="password" autocomplete="off"></label>
+<label>Model (harus support tool calling)<input id="model" placeholder="gpt-4o"></label>
+<label class="chk"><input id="shots" type="checkbox" checked> Kirim screenshot viewport ke AI (model vision)</label></details>
+<div id="log"></div>
+<div id="st"></div>
+<form id="f"><textarea id="p" placeholder="Deskripsikan model 3D… (klik objek di viewport buat dipindah manual)"></textarea><button id="go">Buat</button></form>
+</aside></main>
+<script type="module" src="app.js"></script>
+</body></html>
